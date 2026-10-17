@@ -3,11 +3,28 @@
  * One-time setup: creates .env (if missing) and the first admin user.
  *
  *   node server/setup.js --username admin --password <secret> [--port 3000]
+ *   node server/setup.js --show-token   # print the MSOP_API_TOKEN for MSOP Hosting
  */
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+
+const envPath = path.join(__dirname, "..", ".env");
+
+function ensureApiToken() {
+  let env = fs.existsSync(envPath) ? fs.readFileSync(envPath, "utf8") : "";
+  const m = env.match(/^MSOP_API_TOKEN=(.+)$/m);
+  if (m) return m[1].trim();
+  const token = crypto.randomBytes(24).toString("hex");
+  fs.appendFileSync(envPath, `MSOP_API_TOKEN=${token}\n`);
+  return token;
+}
+
+if (process.argv.includes("--show-token")) {
+  console.log(ensureApiToken());
+  process.exit(0);
+}
 
 function arg(name) {
   const i = process.argv.indexOf(name);
@@ -32,7 +49,6 @@ if (password.length < 6) {
 }
 
 // .env first (db.js reads DATA_DIR from env)
-const envPath = path.join(__dirname, "..", ".env");
 if (!fs.existsSync(envPath)) {
   const secret = crypto.randomBytes(32).toString("hex");
   fs.writeFileSync(
@@ -43,6 +59,7 @@ if (!fs.existsSync(envPath)) {
 } else {
   console.log("[setup] .env already exists, keeping it");
 }
+ensureApiToken();
 
 const { stmts } = require("./db");
 
