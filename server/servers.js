@@ -149,7 +149,9 @@ router.get("/:id/stats", async (req, res) => {
 });
 
 router.get("/:id/console", (req, res) => {
-  res.json({ lines: mc.getConsoleBacklog(req.server.id) });
+  const lines = mc.getConsoleBacklog(req.server.id);
+  const since = Number(req.query.since) || 0;
+  res.json({ lines: since > 0 ? lines.filter((l) => l.t > since) : lines });
 });
 
 module.exports = router;
