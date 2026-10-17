@@ -1,10 +1,12 @@
 "use strict";
 /**
- * Authentication: session login + admin user management.
+ * Authentication: session login + admin user management + API token auth
+ * (for the hosted MSOP Hosting panel, via Authorization: Bearer).
  */
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { stmts, publicUser } = require("./db");
+const crypto = require("crypto");
+const { db, stmts, publicUser } = require("./db");
 
 const router = express.Router();
 
@@ -27,6 +29,10 @@ function recordFail(ip) {
 }
 
 function requireAuth(req, res, next) {
+  if (req.tokenUser) {
+    req.user = req.tokenUser;
+    return next();
+  }
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ error: "Not signed in" });
   }
@@ -41,6 +47,28 @@ function requireAuth(req, res, next) {
 
 function requireAdmin(req, res, next) {
   if (req.user.role !== "admin") return res.status(403).json({ error: "Admin only" });
+  next();
+}
+
+/**
+ * API token auth for the hosted MSOP Hosting panel.
+ * Send `Authorization: Bearer <MSOP_API_TOKEN>`. Acts as the first admin
+ * user so server ownership stays consistent with the local panel.
+ */
+function tokenAuth(req, res, next) {
+  const expected = process.env.MSOP_API_TOKEN || "";
+  const h = req.headers.authorization || "";
+  if (expected && h.startsWith("Bearer ")) {
+    const a = Buffer.from(h.slice(7).trim());
+    const b = Buffer.from(expected);
+    if (a.length === b.length && crypto.timingSafeEqual(a, b)) {
+      const admin = db
+        .prepare("SELECT id, username, role, created_at FROM users WHERE role = 'admin' ORDER BY id LIMIT 1")
+        .get();
+      if (!admin) return res.status(401).json({ error: "No admin user on this node yet" });
+      req.tokenUser = admin;
+    }
+  }
   next();
 }
 
@@ -103,4 +131,4 @@ router.delete("/users/:id", requireAuth, requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = { router, requireAuth, requireAdmin };
+module.exports = { router, requireAuth, requireAdmin, tokenAuth };
