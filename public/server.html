@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server — MSOP Panel</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%234f8cff'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>M</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="cube">M</span><span>MSOP Panel<small>MINECRAFT SERVER PANEL</small></span></div>
+  <nav class="nav"><a href="/">← Dashboard</a></nav>
+  <div class="spacer"></div>
+  <div class="userchip"><span id="chipName"></span><span class="avatar" id="chipAvatar">?</span></div>
+  <button class="btn-logout" id="logoutBtn">Log out</button>
+</header>
+
+<div class="wrap">
+  <div class="srv-header">
+    <div>
+      <h1 id="srvName">Loading…</h1>
+      <div class="sub" id="srvSub"></div>
+    </div>
+    <span class="pill offline" id="srvPill"><span class="dot"></span><span id="srvPillText">offline</span></span>
+    <div class="power">
+      <button class="btn btn-green btn-sm" data-power="start">▶ Start</button>
+      <button class="btn btn-amber btn-sm" data-power="restart">↻ Restart</button>
+      <button class="btn btn-red btn-sm" data-power="stop">■ Stop</button>
+      <button class="btn btn-sm" data-power="kill" title="Force kill">Kill</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button data-tab="console" class="active">Console</button>
+    <button data-tab="files">Files</button>
+    <button data-tab="settings">Settings</button>
+  </div>
+
+  <!-- CONSOLE -->
+  <div class="tabpane active" id="tab-console">
+    <div class="stats">
+      <div class="stat"><div class="k">Status</div><div class="v" id="stStatus">—</div></div>
+      <div class="stat"><div class="k">CPU</div><div class="v"><span id="stCpu">0</span><small>%</small></div><div class="bar"><i id="barCpu" style="width:0%"></i></div></div>
+      <div class="stat"><div class="k">Memory</div><div class="v"><span id="stMem">0</span><small> MB</small></div><div class="bar"><i id="barMem" style="width:0%"></i></div></div>
+      <div class="stat"><div class="k">Players</div><div class="v"><span id="stPlayers">0</span><small id="stMaxPlayers"> / 20</small></div></div>
+      <div class="stat"><div class="k">Uptime</div><div class="v" id="stUptime">—</div></div>
+    </div>
+    <div class="console-box">
+      <div class="install-banner" id="installBanner">
+        <div class="note" id="installNote">Installing…</div>
+        <div class="bar"><i id="installBar" style="width:0%"></i></div>
+      </div>
+      <div class="terminal" id="terminal"></div>
+      <div class="cmd-row">
+        <span class="prompt">›</span>
+        <input id="cmdInput" placeholder='Type a command and press Enter  (e.g. "say hello", "op Steve")' autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- FILES -->
+  <div class="tabpane" id="tab-files">
+    <div class="files-box">
+      <div class="files-toolbar">
+        <div class="crumbs" id="crumbs"></div>
+        <button class="btn btn-sm" id="btnUpload">Upload</button>
+        <button class="btn btn-sm" id="btnMkdir">+ Folder</button>
+        <button class="btn btn-sm btn-ghost" id="btnRefresh">↻</button>
+        <input type="file" id="fileInput" multiple style="display:none">
+      </div>
+      <table class="ftable">
+        <thead><tr><th>Name</th><th>Size</th><th>Modified</th><th></th></tr></thead>
+        <tbody id="fileRows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tabpane" id="tab-settings">
+    <div class="settings-grid">
+      <div class="panel-box">
+        <h3>Server settings</h3>
+        <p class="sub">Changes apply after a restart. The server must be stopped to save.</p>
+        <div class="field"><label>Server name</label><input id="sName" maxlength="32"></div>
+        <div class="field"><label>Memory (RAM)</label>
+          <select id="sMem">
+            <option value="1024">1 GB</option><option value="2048">2 GB</option>
+            <option value="4096">4 GB</option><option value="8192">8 GB</option>
+            <option value="16384">16 GB</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="sAutostart"> Start automatically when the panel boots</label>
+        <div class="modal-actions" style="justify-content:flex-start">
+          <button class="btn btn-primary" id="saveSettings">Save settings</button>
+        </div>
+      </div>
+      <div class="panel-box">
+        <h3>Connection info</h3>
+        <p class="sub">Give players this address to join.</p>
+        <div class="field"><label>Server address</label><input id="sAddr" readonly></div>
+        <div class="hint" style="color:var(--muted2);font-size:12px">Make sure the port is open in your firewall (ufw allow &lt;port&gt;/tcp).</div>
+      </div>
+      <div class="panel-box danger">
+        <h3>Danger zone</h3>
+        <p class="sub">Deletes the server and all of its files forever.</p>
+        <button class="btn btn-red" id="deleteServer">Delete server</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- file editor modal -->
+<div class="modal-back" id="editorModal">
+  <div class="modal wide">
+    <h2 id="editorTitle">Edit file</h2>
+    <p class="sub" id="editorPath"></p>
+    <textarea class="editor-area" id="editorArea" spellcheck="false"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>Cancel</button>
+      <button class="btn btn-primary" id="editorSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/server.js"></script>
+</body>
+</html>
