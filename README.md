@@ -121,6 +121,20 @@ data/                       SQLite db + server files (created at runtime)
 - The file manager cannot escape a server's own directory; `server.jar`
   can't be deleted from the UI.
 
+## v1.1 — remote access (MSOP Hosting)
+
+The panel accepts API-token auth for the hosted panel at
+[msophost.vercel.app](https://msophost.vercel.app):
+
+- Every install generates `MSOP_API_TOKEN` in `.env`
+  (shown at the end of `install.sh`; reprint anytime with
+  `node server/setup.js --show-token`).
+- Send it as `Authorization: Bearer <token>` — it acts as the first admin
+  user, so server ownership stays consistent between the local and hosted
+  panels. Compared with `crypto.timingSafeEqual`.
+- `GET /api/servers/:id/console?since=<ms>` returns only newer lines,
+  for efficient polling from the hosted panel.
+
 ## License
 
 MIT — do whatever you want with it.
