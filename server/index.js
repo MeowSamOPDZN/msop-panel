@@ -27,7 +27,7 @@ const { Server } = require("socket.io");
 })();
 
 const { stmts } = require("./db");
-const { router: authRouter } = require("./auth");
+const { router: authRouter, tokenAuth } = require("./auth");
 const serversRouter = require("./servers");
 const filesRouter = require("./files");
 const { router: versionsRouter } = require("./versions");
@@ -52,6 +52,7 @@ const sessionMiddleware = session({
   cookie: { httpOnly: true, sameSite: "lax", maxAge: 7 * 24 * 3600 * 1000 },
 });
 app.use(sessionMiddleware);
+app.use(tokenAuth);
 app.use(express.json({ limit: "1mb" }));
 
 // API
