@@ -117,6 +117,7 @@ if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q "Status: a
 fi
 
 IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+TOKEN="$(grep -E '^MSOP_API_TOKEN=' "$PANEL_DIR/.env" 2>/dev/null | cut -d= -f2)"
 echo ""
 echo "=========================================="
 echo "  MSOP Panel is running!"
@@ -128,6 +129,11 @@ if [ -n "${MSOP_ADMIN_PASS:-}" ]; then
 else
   echo "  Password: $ADMIN_PASS"
 fi
+echo ""
+echo "  API token (for MSOP Hosting remote panel):"
+echo "  $TOKEN"
+echo "  Keep it secret. Show again anytime with:"
+echo "    node $PANEL_DIR/server/setup.js --show-token"
 echo ""
 echo "  Create a server in the panel, press Start,"
 echo "  and join with  $IP:<port shown on the card>"
