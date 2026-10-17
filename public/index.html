@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — MSOP Panel</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%234f8cff'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>M</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="cube">M</span><span>MSOP Panel<small>MINECRAFT SERVER PANEL</small></span></div>
+  <nav class="nav">
+    <a href="/" class="active">Dashboard</a>
+    <a href="/?tab=users" id="navUsers" style="display:none">Users</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="userchip"><span id="chipName"></span><span class="avatar" id="chipAvatar">?</span></div>
+  <button class="btn-logout" id="logoutBtn">Log out</button>
+</header>
+
+<div class="wrap">
+  <div id="dashView">
+    <div class="page-head">
+      <div><h1>Your Servers</h1><p>Spin up a Minecraft server in one click, then manage it from your browser.</p></div>
+      <button class="btn btn-primary" id="createBtn">+ Create Server</button>
+    </div>
+    <div class="grid" id="serverGrid"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <h3>No servers yet</h3>
+      <p>Create your first Minecraft server to get started.</p>
+    </div>
+  </div>
+
+  <div id="usersView" style="display:none">
+    <div class="page-head">
+      <div><h1>Users</h1><p>Accounts that can sign in to this panel.</p></div>
+      <button class="btn btn-primary" id="addUserBtn">+ Add User</button>
+    </div>
+    <table class="utable"><thead><tr>
+      <th>Username</th><th>Role</th><th>Created</th><th></th>
+    </tr></thead><tbody id="userRows"></tbody></table>
+  </div>
+</div>
+
+<!-- create server modal -->
+<div class="modal-back" id="createModal">
+  <div class="modal">
+    <h2>Create Server</h2>
+    <p class="sub">The server jar downloads automatically. Creating a server accepts the Minecraft EULA.</p>
+    <div class="field">
+      <label>Server name</label>
+      <input id="fName" placeholder="My Survival World" maxlength="32">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Software</label>
+        <select id="fType">
+          <option value="vanilla">Vanilla</option>
+          <option value="paper">Paper (plugins)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Minecraft version</label>
+        <select id="fVersion"><option>Loading…</option></select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Memory (RAM)</label>
+      <select id="fMem">
+        <option value="1024">1 GB</option>
+        <option value="2048" selected>2 GB</option>
+        <option value="4096">4 GB</option>
+        <option value="8192">8 GB</option>
+        <option value="16384">16 GB</option>
+      </select>
+      <div class="hint">A port is assigned automatically starting at 25565.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>Cancel</button>
+      <button class="btn btn-primary" id="doCreate">Create Server</button>
+    </div>
+  </div>
+</div>
+
+<!-- add user modal -->
+<div class="modal-back" id="userModal">
+  <div class="modal">
+    <h2>Add User</h2>
+    <p class="sub">Admins see every server. Users only see their own.</p>
+    <div class="field"><label>Username</label><input id="uName" maxlength="24"></div>
+    <div class="field-row">
+      <div class="field"><label>Password</label><input id="uPass" type="password"></div>
+      <div class="field"><label>Role</label><select id="uRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>Cancel</button>
+      <button class="btn btn-primary" id="doAddUser">Add User</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="/js/common.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
